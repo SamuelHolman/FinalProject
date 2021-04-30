@@ -20,8 +20,12 @@ public class ClickerGame extends javax.swing.JFrame {
     int PayableAmount = 1;
     int AutoPayableAmount = 1;
     int CountDown = 200;
+    int PaymentCount = 0;
+    int AutoBuyerCount = 0;
+    int MoneyAccumulated = 0;
     Timer timer = new Timer();
     Timer BarTimer = new Timer();
+    
     
     TimerTask progressBarUpdate = new TimerTask() {
         @Override
@@ -42,11 +46,8 @@ public class ClickerGame extends javax.swing.JFrame {
         }
     };
     
-    public void startBarUpdater() {
-        BarTimer.scheduleAtFixedRate(progressBarUpdate,0,100);
-    }
-
     
+       
     /**
      * Creates new form ClickerGame
      */
@@ -115,6 +116,10 @@ public class ClickerGame extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(191, 191, 191)
+                .addComponent(lblAutoPayAmount)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
@@ -134,12 +139,10 @@ public class ClickerGame extends javax.swing.JFrame {
                                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jButton3))
                                 .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(barProgress, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(barProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(191, 191, 191)
-                .addComponent(lblAutoPayAmount)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -154,7 +157,7 @@ public class ClickerGame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnAutoPay)
                         .addGap(18, 18, 18)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton3)
                     .addComponent(btnIncreasePayments))
                 .addGap(18, 18, 18)
@@ -172,6 +175,11 @@ public class ClickerGame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnPayOffSomeDebtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtActionPerformed
+        
+        if(PaymentCount == 0) {
+            BarTimer.scheduleAtFixedRate(progressBarUpdate,0,100);
+            PaymentCount ++;
+        }
         
         Debt -= PayableAmount;
         if (Debt <= 0) {
@@ -211,7 +219,22 @@ public class ClickerGame extends javax.swing.JFrame {
     
     private void btnIncreasePaymentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIncreasePaymentsActionPerformed
         //if(Debt < 999)
-        PayableAmount = PayableAmount + 50;
+        
+        if(AutoBuyerCount == 0) {
+            PayableAmount += 49;
+            AutoBuyerCount ++;
+        } else if(AutoBuyerCount > 0 && AutoBuyerCount < 20) {
+            PayableAmount += 50;
+            AutoBuyerCount ++;
+        } else if (AutoBuyerCount > 20 && AutoBuyerCount < 151) {
+            PayableAmount += 500;
+            AutoBuyerCount ++;
+        } else {
+            PayableAmount *= 2;
+            AutoBuyerCount ++;
+        }
+        
+        
         AutoPayableAmount += 100;
         btnPayOffSomeDebt.setText("Pay off $" + PayableAmount);
         
@@ -230,6 +253,7 @@ public class ClickerGame extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        
         //startBarUpdater();
         //LoanPayer Payer = new LoanPayer(1);
         //Debt MainDebt = new Debt(1000000000);
