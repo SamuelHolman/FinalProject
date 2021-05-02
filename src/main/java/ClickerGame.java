@@ -1,12 +1,8 @@
 
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JOptionPane;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  *
@@ -21,11 +17,23 @@ public class ClickerGame extends javax.swing.JFrame {
     int AutoPayableAmount = 1;
     int CountDown = 200;
     int PaymentCount = 0;
-    int AutoBuyerCount = 0;
+    int PaymentIncreaseCount = 0;
     int MoneyAccumulated = 0;
+    int Price;
+    int AutoPayerPrice;
+    int AutoPayerUpgradeCount = 0;
+    int GameTimerCount = 0;
+    Double RoundNumber;
     Timer timer = new Timer();
     Timer BarTimer = new Timer();
+    Timer GameTimer = new Timer();
     
+    TimerTask GameTimerCounter = new TimerTask() {
+        @Override
+        public void run() {
+            GameTimerCount ++;
+        }
+    };
     
     TimerTask progressBarUpdate = new TimerTask() {
         @Override
@@ -38,8 +46,10 @@ public class ClickerGame extends javax.swing.JFrame {
         @Override
         public void run() {
             Debt -= AutoPayableAmount;
+            MoneyAccumulated += AutoPayableAmount;
+            lblMoneyAccumulated.setText("$" + addCommas(MoneyAccumulated) + " Accumulated");
             if (Debt <= 0) {
-                //you win and such
+                gameWon();
             } else {
                 lblDebtAmount.setText(addCommas(Debt));
             }
@@ -65,108 +75,201 @@ public class ClickerGame extends javax.swing.JFrame {
     private void initComponents() {
 
         jProgressBar1 = new javax.swing.JProgressBar();
-        btnPayOffSomeDebt = new javax.swing.JButton();
         btnIncreasePayments = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnResetPaymentAmount = new javax.swing.JButton();
         lblDebtAmount = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         barProgress = new javax.swing.JProgressBar();
         btnAutoPay = new javax.swing.JButton();
-        lblAutoPayAmount = new javax.swing.JLabel();
+        lblMoneyAccumulated = new javax.swing.JLabel();
+        lblAutoPayableAmount = new javax.swing.JLabel();
+        lblPrice = new javax.swing.JLabel();
+        btnIncreaseAutoPayableAmount = new javax.swing.JButton();
+        btnPayOffSomeDebtOne = new javax.swing.JButton();
+        btnPayOffSomeDebtTwo = new javax.swing.JButton();
+        btnPayOffSomeDebtThree = new javax.swing.JButton();
+        btnPayOffSomeDebtFour = new javax.swing.JButton();
+        btnPayOffSomeDebtFive = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Debt Deleter");
+        setBackground(new java.awt.Color(255, 255, 255));
 
-        btnPayOffSomeDebt.setText("Pay off $1");
-        btnPayOffSomeDebt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPayOffSomeDebtActionPerformed(evt);
-            }
-        });
-
-        btnIncreasePayments.setText("Increase Your Payments by $5");
+        btnIncreasePayments.setBackground(new java.awt.Color(153, 153, 255));
+        btnIncreasePayments.setText("Increase Your Payments to $50");
         btnIncreasePayments.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnIncreasePaymentsActionPerformed(evt);
             }
         });
 
-        jButton3.setText("Reset all payments");
+        btnResetPaymentAmount.setBackground(new java.awt.Color(153, 153, 255));
+        btnResetPaymentAmount.setText("Sell Assets to Pay Off Debt");
+        btnResetPaymentAmount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetPaymentAmountActionPerformed(evt);
+            }
+        });
 
         lblDebtAmount.setFont(new java.awt.Font("Verdana", 1, 36)); // NOI18N
         lblDebtAmount.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblDebtAmount.setText("1,000,000,000");
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel2.setText("<html> Resets all payments, but increases the amount of money you pay off the debt with </html>");
+        jLabel2.setText("<html> Resets all money accumulated, but pays the amount of money towards the debt </html>");
 
         barProgress.setMaximum(1000000000);
         barProgress.setValue(1000000000);
 
-        btnAutoPay.setText("Buy an Auto Payer");
+        btnAutoPay.setBackground(new java.awt.Color(153, 153, 255));
+        btnAutoPay.setText("Buy an Auto Payer for $10,000");
         btnAutoPay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAutoPayActionPerformed(evt);
             }
         });
 
-        lblAutoPayAmount.setText("jLabel1");
+        lblMoneyAccumulated.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        lblMoneyAccumulated.setText("$0 Accumulated");
+
+        lblAutoPayableAmount.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        lblAutoPayableAmount.setText("$1 Being Auto Payed");
+        lblAutoPayableAmount.setToolTipText("");
+
+        lblPrice.setText("Costs $0");
+
+        btnIncreaseAutoPayableAmount.setBackground(new java.awt.Color(153, 153, 255));
+        btnIncreaseAutoPayableAmount.setText("Upgrade Auto Payer");
+        btnIncreaseAutoPayableAmount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIncreaseAutoPayableAmountActionPerformed(evt);
+            }
+        });
+
+        btnPayOffSomeDebtOne.setBackground(new java.awt.Color(0, 153, 51));
+        btnPayOffSomeDebtOne.setText("Pay Off $1");
+        btnPayOffSomeDebtOne.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayOffSomeDebtOneActionPerformed(evt);
+            }
+        });
+
+        btnPayOffSomeDebtTwo.setBackground(new java.awt.Color(0, 153, 51));
+        btnPayOffSomeDebtTwo.setText("Pay Off $1");
+        btnPayOffSomeDebtTwo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayOffSomeDebtTwoActionPerformed(evt);
+            }
+        });
+
+        btnPayOffSomeDebtThree.setBackground(new java.awt.Color(0, 153, 51));
+        btnPayOffSomeDebtThree.setText("Pay Off $1");
+        btnPayOffSomeDebtThree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayOffSomeDebtThreeActionPerformed(evt);
+            }
+        });
+
+        btnPayOffSomeDebtFour.setBackground(new java.awt.Color(0, 153, 51));
+        btnPayOffSomeDebtFour.setText("Pay Off $1");
+        btnPayOffSomeDebtFour.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayOffSomeDebtFourActionPerformed(evt);
+            }
+        });
+
+        btnPayOffSomeDebtFive.setBackground(new java.awt.Color(0, 153, 51));
+        btnPayOffSomeDebtFive.setText("Pay Off $1");
+        btnPayOffSomeDebtFive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPayOffSomeDebtFiveActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Verdana", 3, 36)); // NOI18N
+        jLabel1.setText("Debt Deleter");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(191, 191, 191)
-                .addComponent(lblAutoPayAmount)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblDebtAmount, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblAutoPayableAmount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblDebtAmount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(barProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblMoneyAccumulated, javax.swing.GroupLayout.PREFERRED_SIZE, 348, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(45, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnPayOffSomeDebt)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnAutoPay)
-                                .addGap(154, 154, 154))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnIncreasePayments)
-                                .addGap(130, 130, 130)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButton3))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(barProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(btnAutoPay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnIncreasePayments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnResetPaymentAmount)
+                            .addComponent(btnIncreaseAutoPayableAmount)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnPayOffSomeDebtFive)
+                            .addComponent(btnPayOffSomeDebtFour)
+                            .addComponent(btnPayOffSomeDebtOne)
+                            .addComponent(btnPayOffSomeDebtTwo)
+                            .addComponent(btnPayOffSomeDebtThree))
+                        .addGap(19, 19, 19))))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(71, 71, 71)
+                .addComponent(jLabel1)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblDebtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAutoPay)
+                    .addComponent(btnPayOffSomeDebtOne))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnIncreasePayments)
+                    .addComponent(btnPayOffSomeDebtTwo))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblPrice)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnIncreaseAutoPayableAmount)
+                    .addComponent(btnPayOffSomeDebtThree))
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnResetPaymentAmount)
+                    .addComponent(btnPayOffSomeDebtFour))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblDebtAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnPayOffSomeDebt)
-                        .addGap(33, 33, 33))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(btnAutoPay)
-                        .addGap(18, 18, 18)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton3)
-                    .addComponent(btnIncreasePayments))
-                .addGap(18, 18, 18)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblAutoPayAmount)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 126, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(btnPayOffSomeDebtFive)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblAutoPayableAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblMoneyAccumulated, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(barProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel2.getAccessibleContext().setAccessibleName("Resets all payments, but increases the /n amount of money you pay off the debt with");
@@ -174,27 +277,47 @@ public class ClickerGame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnPayOffSomeDebtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtActionPerformed
-        
+    public void PayOffSomeDebt() {
         if(PaymentCount == 0) {
             BarTimer.scheduleAtFixedRate(progressBarUpdate,0,100);
+            GameTimer.scheduleAtFixedRate(GameTimerCounter,0,1000);
             PaymentCount ++;
         }
         
         Debt -= PayableAmount;
+        MoneyAccumulated += PayableAmount;
+        lblMoneyAccumulated.setText("$" + addCommas(MoneyAccumulated) + " Accumulated");
         if (Debt <= 0) {
-            //you win and such
+            gameWon();
+            
         } else {
             lblDebtAmount.setText(addCommas(Debt));
         }
+    }
+    
+    
+    public void gameWon() {
+        Debt = 0;
+        lblDebtAmount.setText(addCommas(Debt));
+        GameTimer.cancel();
+        BarTimer.cancel();
+        timer.cancel();
+        barProgress.setValue(0);
+        lblDebtAmount.setText("0");
+        JOptionPane.showMessageDialog(null, "You paid off your debt and won! It only took you " + ((GameTimerCount - (GameTimerCount % 60)) / 60) + " Minutes and " + GameTimerCount % 60 + " Seconds");
         
-    }//GEN-LAST:event_btnPayOffSomeDebtActionPerformed
-
+    }
+    
     public static String addCommas(int x) {
+        
         String firstThreeNumbers;
         String nextThreeNumbers;
         String nextNumbers;
         String s;
+        
+        if (x >= 1000000000) {
+            return "1,000,000,000";
+        }
         
         s = String.valueOf(x);
         
@@ -218,45 +341,153 @@ public class ClickerGame extends javax.swing.JFrame {
     }
     
     private void btnIncreasePaymentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIncreasePaymentsActionPerformed
-        //if(Debt < 999)
+       
         
-        if(AutoBuyerCount == 0) {
+        
+
+        
+        if(MoneyAccumulated >= Price) {
+            MoneyAccumulated -= Price;
+            Debt += Price;
+            lblMoneyAccumulated.setText("$" + addCommas(MoneyAccumulated) + " Accumulated");
+        
+        if(PaymentIncreaseCount == 0) {
             PayableAmount += 49;
-            AutoBuyerCount ++;
-        } else if(AutoBuyerCount > 0 && AutoBuyerCount < 20) {
+            PaymentIncreaseCount ++;
+            btnIncreasePayments.setText("Increase Your Payments by $50");
+            
+        } else if(PaymentIncreaseCount > 0 && PaymentIncreaseCount < 20) {
             PayableAmount += 50;
-            AutoBuyerCount ++;
-        } else if (AutoBuyerCount > 20 && AutoBuyerCount < 151) {
+            PaymentIncreaseCount ++;
+            if (PaymentIncreaseCount == 20) {
+                btnIncreasePayments.setText("Increase Your Payments by $500");
+            }
+            
+            
+        } else if (PaymentIncreaseCount >= 20 && PaymentIncreaseCount <= 150) {
             PayableAmount += 500;
-            AutoBuyerCount ++;
+            PaymentIncreaseCount ++;
+            
+            if (PaymentIncreaseCount == 151) {
+                btnIncreasePayments.setText("Double Your Payments!");
+            } else {
+                btnIncreasePayments.setText("Increase Your Payments by $500");
+            }
+            
         } else {
             PayableAmount *= 2;
-            AutoBuyerCount ++;
+            PaymentIncreaseCount ++;
+            
+            if(PayableAmount >= 1000000000) {
+                PayableAmount = 1000000000;
+                btnIncreasePayments.setText("You have reached the limit of your payments");
+            } else {
+                btnIncreasePayments.setText("Double Your Payments!");
+            }
         }
         
+        btnPayOffSomeDebtOne.setText("Pay off $" + addCommas(PayableAmount));
+        btnPayOffSomeDebtTwo.setText("Pay off $" + addCommas(PayableAmount));
+        btnPayOffSomeDebtThree.setText("Pay off $" + addCommas(PayableAmount));
+        btnPayOffSomeDebtFour.setText("Pay off $" + addCommas(PayableAmount));
+        btnPayOffSomeDebtFive.setText("Pay off $" + addCommas(PayableAmount));
         
-        AutoPayableAmount += 100;
-        btnPayOffSomeDebt.setText("Pay off $" + PayableAmount);
+        if (PayableAmount >= 1000000000) {
+                Price = 500000000;
+        } else {
+                Price = PayableAmount * 5;
+        }
+        
+        }
+        
+        lblPrice.setText("Costs $" + addCommas(Price));
         
     }//GEN-LAST:event_btnIncreasePaymentsActionPerformed
 
     private void btnAutoPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAutoPayActionPerformed
-        
-        //btnAutoPay.setVisible(false);
-        int x = 1;
-        
-        timer.scheduleAtFixedRate(AutoPayer,CountDown,CountDown);
-        
+        if(MoneyAccumulated >= 10000) {
+            btnAutoPay.setEnabled(false);
+            lblAutoPayableAmount.setVisible(true);
+            timer.scheduleAtFixedRate(AutoPayer,CountDown,CountDown);
+        }
     }//GEN-LAST:event_btnAutoPayActionPerformed
+
+    private void btnIncreaseAutoPayableAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIncreaseAutoPayableAmountActionPerformed
+        
+        if(MoneyAccumulated >= AutoPayerPrice) {
+            
+            RoundNumber = AutoPayableAmount * 1.51;
+            AutoPayableAmount = (int) Math.round(RoundNumber);
+            lblAutoPayableAmount.setText("$" + addCommas(AutoPayableAmount) + " Being Autopayed");
+            
+            MoneyAccumulated -= AutoPayerPrice;
+            
+            AutoPayerPrice = AutoPayableAmount * 15;
+            
+            btnIncreaseAutoPayableAmount.setText("Upgrade Auto Payer for $" + addCommas(AutoPayerPrice));
+        }
+        
+        
+    }//GEN-LAST:event_btnIncreaseAutoPayableAmountActionPerformed
+
+    private void btnPayOffSomeDebtFiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtFiveActionPerformed
+        PayOffSomeDebt();
+        btnPayOffSomeDebtOne.setVisible(true);
+        btnPayOffSomeDebtTwo.setVisible(false);
+        btnPayOffSomeDebtThree.setVisible(false);
+        btnPayOffSomeDebtFour.setVisible(false);
+        btnPayOffSomeDebtFive.setVisible(false);
+    }//GEN-LAST:event_btnPayOffSomeDebtFiveActionPerformed
+
+    private void btnPayOffSomeDebtFourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtFourActionPerformed
+        PayOffSomeDebt();
+        btnPayOffSomeDebtOne.setVisible(false);
+        btnPayOffSomeDebtTwo.setVisible(false);
+        btnPayOffSomeDebtThree.setVisible(false);
+        btnPayOffSomeDebtFour.setVisible(false);
+        btnPayOffSomeDebtFive.setVisible(true);
+    }//GEN-LAST:event_btnPayOffSomeDebtFourActionPerformed
+
+    private void btnPayOffSomeDebtThreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtThreeActionPerformed
+        PayOffSomeDebt();
+        btnPayOffSomeDebtOne.setVisible(false);
+        btnPayOffSomeDebtTwo.setVisible(false);
+        btnPayOffSomeDebtThree.setVisible(false);
+        btnPayOffSomeDebtFour.setVisible(true);
+        btnPayOffSomeDebtFive.setVisible(false);
+    }//GEN-LAST:event_btnPayOffSomeDebtThreeActionPerformed
+
+    private void btnPayOffSomeDebtTwoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtTwoActionPerformed
+        PayOffSomeDebt();
+        btnPayOffSomeDebtOne.setVisible(false);
+        btnPayOffSomeDebtTwo.setVisible(false);
+        btnPayOffSomeDebtThree.setVisible(true);
+        btnPayOffSomeDebtFour.setVisible(false);
+        btnPayOffSomeDebtFive.setVisible(false);
+    }//GEN-LAST:event_btnPayOffSomeDebtTwoActionPerformed
+
+    private void btnPayOffSomeDebtOneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayOffSomeDebtOneActionPerformed
+        PayOffSomeDebt();
+        btnPayOffSomeDebtOne.setVisible(false);
+        btnPayOffSomeDebtTwo.setVisible(true);
+        btnPayOffSomeDebtThree.setVisible(false);
+        btnPayOffSomeDebtFour.setVisible(false);
+        btnPayOffSomeDebtFive.setVisible(false);
+    }//GEN-LAST:event_btnPayOffSomeDebtOneActionPerformed
+
+    private void btnResetPaymentAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetPaymentAmountActionPerformed
+        Debt -= MoneyAccumulated;
+        MoneyAccumulated = 0;
+        lblMoneyAccumulated.setText("$" + addCommas(MoneyAccumulated) + " Accumulated");
+        lblDebtAmount.setText(addCommas(Debt));
+    }//GEN-LAST:event_btnResetPaymentAmountActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         
-        //startBarUpdater();
-        //LoanPayer Payer = new LoanPayer(1);
-        //Debt MainDebt = new Debt(1000000000);
+        
         
         
         /* Set the Nimbus look and feel */
@@ -297,12 +528,20 @@ public class ClickerGame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JProgressBar barProgress;
     private javax.swing.JButton btnAutoPay;
+    private javax.swing.JButton btnIncreaseAutoPayableAmount;
     private javax.swing.JButton btnIncreasePayments;
-    private javax.swing.JButton btnPayOffSomeDebt;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton btnPayOffSomeDebtFive;
+    private javax.swing.JButton btnPayOffSomeDebtFour;
+    private javax.swing.JButton btnPayOffSomeDebtOne;
+    private javax.swing.JButton btnPayOffSomeDebtThree;
+    private javax.swing.JButton btnPayOffSomeDebtTwo;
+    private javax.swing.JButton btnResetPaymentAmount;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JLabel lblAutoPayAmount;
+    private javax.swing.JLabel lblAutoPayableAmount;
     private javax.swing.JLabel lblDebtAmount;
+    private javax.swing.JLabel lblMoneyAccumulated;
+    private javax.swing.JLabel lblPrice;
     // End of variables declaration//GEN-END:variables
 }
